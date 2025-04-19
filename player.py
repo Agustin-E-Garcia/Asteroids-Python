@@ -1,10 +1,12 @@
 from circleshape import *
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, COLOR_WHITE
+from constants import *
+from playershot import PlayerShot
 
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.shot_delay = 0
 
     # in the player class
     def triangle(self):
@@ -21,6 +23,8 @@ class Player(CircleShape):
     def update(self, delta_time):
         keys = pygame.key.get_pressed()
 
+        self.shot_delay -= delta_time
+
         if keys[pygame.K_a]:
             self.rotate(-delta_time)
         if keys[pygame.K_d]:
@@ -29,6 +33,8 @@ class Player(CircleShape):
             self.move(-delta_time)
         if keys[pygame.K_w]:
             self.move(delta_time)
+        if keys[pygame.K_SPACE]:
+            self.shoot()
 
     def rotate(self, delta_time):
         self.rotation += PLAYER_TURN_SPEED * delta_time
@@ -36,3 +42,9 @@ class Player(CircleShape):
     def move(self, delta_time):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.position += forward * PLAYER_SPEED * delta_time
+
+    def shoot(self):
+        if self.shot_delay <= 0:
+            shot = PlayerShot(self.position.x, self.position.y)
+            shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
+            self.shot_delay = PLAYER_RATE_OF_FIRE
